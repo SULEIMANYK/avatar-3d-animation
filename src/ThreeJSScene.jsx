@@ -71,6 +71,8 @@ const ThreeJSScene = () => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    console.log("Loading model from:", CONFIG.model.url); // Debugging
+
     let camera, scene, renderer, mixer, actions, activeAction, previousAction;
     let clock = new THREE.Clock();
     let stats;
@@ -169,9 +171,9 @@ const ThreeJSScene = () => {
     };
 
     // Load the 3D model
-    const loadModel = () => {
+    const loadModel = async () => {
       const loader = new GLTFLoader();
-      loader.load(
+     await loader.load(
         CONFIG.model.url,
         (gltf) => {
           console.log("Model loaded successfully");
