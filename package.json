@@ -1,7 +1,10 @@
 {
-  "name": "threejs-react",
+  "name": "hbku-interactive-3d-avatar",
   "version": "1.0.0",
   "description": "Three.js WebGL skinning and morphing in React",
+  "author": {
+    "name": "Suleiman Yaakoubi"
+  },
   "main": "src/main.jsx",
   "scripts": {
     "start": "vite",

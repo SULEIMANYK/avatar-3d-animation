@@ -4,64 +4,62 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min";
 import Stats from "three/examples/jsm/libs/stats.module";
 
-// Centralized configuration
+// Centralized configuration object for easy adjustments
 const CONFIG = {
   camera: {
-    fov: 45,
-    near: 0.25,
-    far: 200,
-    position: new THREE.Vector3(-5, 3, 10),
-    lookAt: new THREE.Vector3(0, 2, 0),
+    fov: 45, // Field of View (determines how much of the scene is visible)
+    near: 0.25, // Near clipping plane (closer objects are not rendered)
+    far: 200, // Far clipping plane (objects beyond this distance are not rendered)
+    position: new THREE.Vector3(-5, 3, 10), // Initial camera position in the scene
+    lookAt: new THREE.Vector3(0, 2, 0), // Point where the camera initially looks
   },
   scene: {
-    background: 0xe0e0e0,
-    fog: { color: 0xe0e0e0, near: 20, far: 100 },
+    background: 0xe0e0e0, // Background color of the scene
+    fog: { 
+      color: 0xe0e0e0, // Fog color, matching background to blend smoothly
+      near: 20, // Distance at which fog starts appearing
+      far: 100, // Distance at which fog completely obscures objects
+    },
   },
   lights: {
     hemiLight: {
-      color: 0xffffff,
-      groundColor: 0x8d8d8d,
-      intensity: 3,
-      position: new THREE.Vector3(0, 20, 0),
+      color: 0xffffff, // Sky light color
+      groundColor: 0x8d8d8d, // Ground light reflection color
+      intensity: 3, // Brightness of the light
+      position: new THREE.Vector3(0, 20, 0), // Position of the hemisphere light in the scene
     },
     dirLight: {
-      color: 0xffffff,
-      intensity: 3,
-      position: new THREE.Vector3(0, 20, 10),
+      color: 0xffffff, // Directional light color
+      intensity: 3, // Brightness of the directional light
+      position: new THREE.Vector3(0, 20, 10), // Position of the directional light
     },
   },
   ground: {
-    size: { width: 2000, height: 2000 },
-    material: { color: 0xcbcbcb, depthWrite: false },
+    size: { width: 2000, height: 2000 }, // Dimensions of the ground plane
+    material: { color: 0xcbcbcb, depthWrite: false }, // Ground material properties
   },
   grid: {
-    size: 200,
-    divisions: 40,
-    color: 0x000000,
-    opacity: 0.2,
+    size: 200, // Total size of the grid helper
+    divisions: 40, // Number of divisions in the grid
+    color: 0x000000, // Grid line color
+    opacity: 0.2, // Transparency level of the grid lines
   },
   model: {
-    url: "/models/RobotExpressive.glb", // Path relative to the public folder
+    url: "/models/RobotExpressive.glb", // Path to the 3D model file relative to the public folder
   },
   animations: {
     states: [
-      "Idle",
-      "Walking",
-      "Running",
-      "Dance",
-      "Death",
-      "Sitting",
-      "Standing",
-    ],
-    emotes: ["Jump", "Yes", "No", "Wave", "Punch", "ThumbsUp"],
+      "Idle", "Walking", "Running", "Dance", "Death", "Sitting", "Standing",
+    ], // List of primary animation states for the character
+    emotes: ["Jump", "Yes", "No", "Wave", "Punch", "ThumbsUp"], // List of emote animations
   },
   cursorFollow: {
-    sensitivity: 0.05,
+    sensitivity: 0.05, // Controls how smoothly the model follows the cursor
   },
   keyboard: {
-    moveSpeed: 0.1,
-    jumpHeight: 2,
-    rotationSpeed: 0.05,
+    moveSpeed: 0.1, // Speed of movement when using arrow keys
+    jumpHeight: 2, // Height of the jump when spacebar is pressed
+    rotationSpeed: 0.05, // Speed of rotation when moving left/right
   },
 };
 
