@@ -41,7 +41,7 @@ const CONFIG = {
     opacity: 0.2,
   },
   model: {
-    url: "/public/models/RobotExpressive.glb",
+    url: "/models/RobotExpressive.glb", // Path relative to the public folder
   },
   animations: {
     states: [
@@ -74,7 +74,7 @@ const ThreeJSScene = () => {
     let camera, scene, renderer, mixer, actions, activeAction, previousAction;
     let clock = new THREE.Clock();
     let stats;
-    const api = { state: "Idle", mode: "Default", speed: 1, emote: "Jump" }; // Added emote to API
+    const api = { state: "Idle", mode: "Default", speed: 1, emote: "Jump" };
     const cursor = new THREE.Vector2();
     let model;
     const keys = {
@@ -174,6 +174,7 @@ const ThreeJSScene = () => {
       loader.load(
         CONFIG.model.url,
         (gltf) => {
+          console.log("Model loaded successfully");
           model = gltf.scene;
           model.traverse((child) => {
             if (child.isMesh) {
@@ -187,10 +188,11 @@ const ThreeJSScene = () => {
         },
         (xhr) => {
           const percent = (xhr.loaded / xhr.total) * 100;
+          console.log(`Loading: ${percent}%`);
           setProgress(percent);
         },
         (error) => {
-          console.error("Error loading GLTF model:", error);
+          console.error("Error loading model:", error);
           setLoading(false);
         }
       );
