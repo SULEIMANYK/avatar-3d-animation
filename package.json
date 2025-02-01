@@ -1,0 +1,20 @@
+{
+  "name": "threejs-react",
+  "version": "1.0.0",
+  "description": "Three.js WebGL skinning and morphing in React",
+  "main": "src/main.jsx",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.4",
+    "vite": "^5.0.0"
+  }
+}
