@@ -173,43 +173,31 @@ const ThreeJSScene = () => {
     // Load the 3D model
     const loadModel = async () => {
       const loader = new GLTFLoader();
-      
-      try {
-        // Convert loader.load to a Promise
-        const gltf = await new Promise((resolve, reject) => {
-          loader.load(
-            CONFIG.model.url,
-            resolve,
-            (xhr) => {
-              const percent = (xhr.loaded / xhr.total) * 100;
-              console.log(`Loading: ${percent}%`);
-              setProgress(percent);
-            },
-            reject
-          );
-        });
-    
-        console.log("Model loaded successfully");
-        const model = gltf.scene;
-        
-        // Set shadow properties
-        model.traverse((child) => {
-          if (child.isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
-        });
-        
-        scene.add(model);
-        createGUI(model, gltf.animations);
-        setLoading(false);
-        
-        return model;
-      } catch (error) {
-        console.error("Error loading model:", error);
-        setLoading(false);
-        throw error; // Re-throw to allow caller to handle the error
-      }
+     await loader.load(
+     window.location.origin+   CONFIG.model.url,
+        (gltf) => {
+          console.log("Model loaded successfully");
+          model = gltf.scene;
+          model.traverse((child) => {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
+          scene.add(model);
+          createGUI(model, gltf.animations);
+          setLoading(false);
+        },
+        (xhr) => {
+          const percent = (xhr.loaded / xhr.total) * 100;
+          console.log(`Loading: ${percent}%`);
+          setProgress(percent);
+        },
+        (error) => {
+          console.error("Error loading model:", error);
+          setLoading(false);
+        }
+      );
     };
 
     // Create the GUI for controlling animations and modes
@@ -403,14 +391,14 @@ const ThreeJSScene = () => {
     };
 
     // Initialize the scene and all components
-    const init = async () => {
+    const init = () => {
       initCamera();
       initScene();
       initLights();
       initGround();
       initRenderer();
       initStats();
-     await  loadModel();
+      loadModel();
       window.addEventListener("resize", onWindowResize);
       window.addEventListener("mousemove", onMouseMove);
       window.addEventListener("keydown", onKeyDown);
