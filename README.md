@@ -72,11 +72,6 @@ The project uses a `CONFIG` object to centralize various settings:
 - `three/examples/jsm/libs/stats.module`
 - `three/examples/jsm/libs/lil-gui.module.min`
 
-## Future Enhancements
-
-- Add additional models and animations.
-- Implement collision detection.
-- Optimize performance for larger models.
 
 
 
