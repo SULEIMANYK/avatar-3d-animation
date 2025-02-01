@@ -403,14 +403,14 @@ const ThreeJSScene = () => {
     };
 
     // Initialize the scene and all components
-    const init = () => {
+    const init = async () => {
       initCamera();
       initScene();
       initLights();
       initGround();
       initRenderer();
       initStats();
-      loadModel();
+     await  loadModel();
       window.addEventListener("resize", onWindowResize);
       window.addEventListener("mousemove", onMouseMove);
       window.addEventListener("keydown", onKeyDown);
