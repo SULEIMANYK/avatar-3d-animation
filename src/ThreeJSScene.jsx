@@ -303,6 +303,9 @@ const ThreeJSScene = () => {
     const onKeyUp = (event) => {
       if (event.code in keys) {
         keys[event.code] = false;
+         fadeToAction("Idle", 0.2); // Smoothly transition to "Idle"
+            api.state = "Idle"; // Update the state
+
       }
     };
 
@@ -374,8 +377,8 @@ const ThreeJSScene = () => {
         } else {
           // If no movement key is pressed and the current state is "Walking", switch back to "Idle"
           if (api.state === "Walking") {
-            fadeToAction("Idle", 0.2); // Smoothly transition to "Idle"
-            api.state = "Idle"; // Update the state
+            // fadeToAction("Idle", 0.2); // Smoothly transition to "Idle"
+            // api.state = "Idle"; // Update the state
           }
         }
 
