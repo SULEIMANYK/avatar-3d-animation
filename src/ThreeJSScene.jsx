@@ -41,7 +41,7 @@ const CONFIG = {
     opacity: 0.2,
   },
   model: {
-    url: "models/RobotExpressive.glb",
+    url: "/public/models/RobotExpressive.glb",
   },
   animations: {
     states: [
