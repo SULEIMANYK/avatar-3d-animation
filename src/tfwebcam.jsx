@@ -4,11 +4,10 @@ import * as posenet from "@tensorflow-models/posenet";
 import Webcam from "react-webcam";
 import { drawKeypoints, drawSkeleton } from "./utilities";
 
-function TfWebcam() {
+function TfWebcam({ onMovementUpdate }) {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const [previousPose, setPreviousPose] = useState(null);
-  const [movementDetected, setMovementDetected] = useState(false);
 
   // Load posenet
   const runPosenet = async () => {
@@ -40,15 +39,21 @@ function TfWebcam() {
       const pose = await net.estimateSinglePose(video);
       console.log(pose);
 
-      // Detect movement
+      // Detect movement and poses
       if (previousPose) {
-        const isMovement = detectThumbMovement(previousPose, pose);
-        if (isMovement && !movementDetected) {
-          setMovementDetected(true);
-          alert("Thumb movement detected!"); // Trigger alert
-        } else if (!isMovement) {
-          setMovementDetected(false);
-        }
+        const isThumbMovement = detectThumbMovement(previousPose, pose);
+        const handPoseDetected = detectHandPose(pose);
+        const headPoseDetected = detectHeadPose(pose);
+
+        // Prepare movement data to send to parent
+        const movementData = {
+          thumbPose: isThumbMovement ? "Thumb Movement Detected" : "No Thumb Movement",
+          handPose: handPoseDetected ? "Hand Pose Detected" : "No Hand Pose Detected",
+          headPose: headPoseDetected ? "Head Pose Detected" : "No Head Pose Detected",
+        };
+
+        // Send movement data to parent
+        onMovementUpdate(movementData);
       }
 
       // Update previous pose
@@ -89,6 +94,58 @@ function TfWebcam() {
 
     // Return true if movement exceeds the threshold
     return totalMovement > threshold;
+  };
+
+  const detectHandPose = (pose) => {
+    // Keypoints for hands
+    const leftWristIndex = 9;
+    const rightWristIndex = 10;
+    const leftElbowIndex = 7;
+    const rightElbowIndex = 8;
+
+    const leftWrist = pose.keypoints[leftWristIndex];
+    const rightWrist = pose.keypoints[rightWristIndex];
+    const leftElbow = pose.keypoints[leftElbowIndex];
+    const rightElbow = pose.keypoints[rightElbowIndex];
+
+    // Calculate angles for hand pose
+    const leftAngle = calculateAngle(leftWrist, leftElbow);
+    const rightAngle = calculateAngle(rightWrist, rightElbow);
+
+    // Example: Detect if hands are raised
+    if (leftAngle > 90 && rightAngle > 90) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const detectHeadPose = (pose) => {
+    // Keypoints for head
+    const noseIndex = 0;
+    const leftEarIndex = 3;
+    const rightEarIndex = 4;
+
+    const nose = pose.keypoints[noseIndex];
+    const leftEar = pose.keypoints[leftEarIndex];
+    const rightEar = pose.keypoints[rightEarIndex];
+
+    // Calculate angles for head pose
+    const headAngle = calculateAngle(leftEar, rightEar, nose);
+
+    // Example: Detect if head is tilted
+    if (headAngle < 160 || headAngle > 200) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const calculateAngle = (pointA, pointB, pointC) => {
+    if (!pointA || !pointB || !pointC) return 0;
+
+    const angle = Math.atan2(pointC.y - pointB.y, pointC.x - pointB.x) - Math.atan2(pointA.y - pointB.y, pointA.x - pointB.x);
+    return Math.abs(angle * (180 / Math.PI));
   };
 
   const drawCanvas = (pose, video, videoWidth, videoHeight, canvas) => {

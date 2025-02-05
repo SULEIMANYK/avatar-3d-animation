@@ -16,7 +16,7 @@ const CONFIG = {
   },
   scene: {
     background: 0xe0e0e0, // Background color of the scene
-    fog: { 
+    fog: {
       color: 0xe0e0e0, // Fog color, matching background to blend smoothly
       near: 20, // Distance at which fog starts appearing
       far: 100, // Distance at which fog completely obscures objects
@@ -50,7 +50,13 @@ const CONFIG = {
   },
   animations: {
     states: [
-      "Idle", "Walking", "Running", "Dance", "Death", "Sitting", "Standing",
+      "Idle",
+      "Walking",
+      "Running",
+      "Dance",
+      "Death",
+      "Sitting",
+      "Standing",
     ], // List of primary animation states for the character
     emotes: ["Jump", "Yes", "No", "Wave", "Punch", "ThumbsUp"], // List of emote animations
   },
@@ -68,10 +74,21 @@ const ThreeJSScene = () => {
   const mountRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [movementData, setMovementData] = useState({
+    thumbPose: null,
+    handPose: null,
+    headPose: null,
+  });
+
+  const handleMovementUpdate = (newMovementData) => {
+    setMovementData(newMovementData);
+  };
 
   useEffect(() => {
-    console.log("Loading model from:", CONFIG.model.url); // Debugging
+    console.log("Movement data updated:", movementData);
+  }, [movementData]);
 
+  useEffect(() => {
     let camera, scene, renderer, mixer, actions, activeAction, previousAction;
     let clock = new THREE.Clock();
     let stats;
@@ -172,8 +189,8 @@ const ThreeJSScene = () => {
     // Load the 3D model
     const loadModel = async () => {
       const loader = new GLTFLoader();
-     await loader.load(
-     window.location.origin+   CONFIG.model.url,
+      await loader.load(
+        window.location.origin + CONFIG.model.url,
         (gltf) => {
           console.log("Model loaded successfully");
           model = gltf.scene;
@@ -304,9 +321,8 @@ const ThreeJSScene = () => {
     const onKeyUp = (event) => {
       if (event.code in keys) {
         keys[event.code] = false;
-         fadeToAction("Idle", 0.2); // Smoothly transition to "Idle"
-            api.state = "Idle"; // Update the state
-
+        fadeToAction("Idle", 0.2); // Smoothly transition to "Idle"
+        api.state = "Idle"; // Update the state
       }
     };
 
@@ -323,7 +339,8 @@ const ThreeJSScene = () => {
 
     // Handle left-click for an emote (e.g., "Wave")
     const onMouseDown = (event) => {
-      if (event.button === 0) { // Left-click
+      if (event.button === 0) {
+        // Left-click
         playEmote("Wave"); // Play the "Wave" emote
       }
     };
@@ -339,6 +356,22 @@ const ThreeJSScene = () => {
       requestAnimationFrame(animate);
       const dt = clock.getDelta();
 
+      // Update model based on movement data
+      if (model) {
+        if (movementData.thumbPose === "Thumb Movement Detected") {
+          fadeToAction("Wave", 0.2); // Example: Wave animation
+        }
+
+        if (movementData.handPose === "Hand Pose Detected") {
+          model.position.x += 0.1; // Example: Move model to the right
+        }
+
+        if (movementData.headPose === "Head Pose Detected") {
+          model.rotation.y += 0.05; // Example: Rotate model
+        }
+      }
+
+      // Existing animation logic
       if (api.mode === "Follow Cursor" && model) {
         const targetPosition = getCursorWorldPosition();
         model.position.lerp(targetPosition, CONFIG.cursorFollow.sensitivity);
@@ -347,43 +380,38 @@ const ThreeJSScene = () => {
 
       if (model) {
         const moveSpeed = CONFIG.keyboard.moveSpeed;
-
-        // Check if any movement key is pressed
-        const isMoving = keys.ArrowUp || keys.ArrowDown || keys.ArrowLeft || keys.ArrowRight;
+        const isMoving =
+          keys.ArrowUp || keys.ArrowDown || keys.ArrowLeft || keys.ArrowRight;
 
         if (isMoving) {
-          // If not already in "Walking" or "Running" state, switch to "Walking"
           if (api.state !== "Walking" && api.state !== "Running") {
-            fadeToAction("Walking", 0.2); // Smoothly transition to "Walking"
-            api.state = "Walking"; // Update the state
+            fadeToAction("Walking", 0.2);
+            api.state = "Walking";
           }
 
-          // Move the model based on key input
           if (keys.ArrowUp) {
             model.position.z -= moveSpeed;
-            model.rotation.y = Math.PI; // Face forward
+            model.rotation.y = Math.PI;
           }
           if (keys.ArrowDown) {
             model.position.z += moveSpeed;
-            model.rotation.y = 0; // Face backward
+            model.rotation.y = 0;
           }
           if (keys.ArrowLeft) {
             model.position.x -= moveSpeed;
-            model.rotation.y = -Math.PI / 2; // Face left
+            model.rotation.y = -Math.PI / 2;
           }
           if (keys.ArrowRight) {
             model.position.x += moveSpeed;
-            model.rotation.y = Math.PI / 2; // Face right
+            model.rotation.y = Math.PI / 2;
           }
         } else {
-          // If no movement key is pressed and the current state is "Walking", switch back to "Idle"
           if (api.state === "Walking") {
-            // fadeToAction("Idle", 0.2); // Smoothly transition to "Idle"
-            // api.state = "Idle"; // Update the state
+            fadeToAction("Idle", 0.2);
+            api.state = "Idle";
           }
         }
 
-        // Handle jumping
         if (keys.Space) jump();
       }
 
@@ -422,74 +450,75 @@ const ThreeJSScene = () => {
       window.removeEventListener("contextmenu", onContextMenu); // Remove right-click listener
       mountRef.current?.removeChild(renderer.domElement);
     };
-  }, []);
+  }, [movementData]); // Add movementData as a dependency
 
   return (
-<div 
-  ref={mountRef} 
-  style={{ 
-    width: "100vw", 
-    height: "100vh", 
-    position: "relative", 
-    overflow: "hidden", 
-    backgroundColor: "#1e1e1e" // Dark background for better contrast
-  }}
->
-  {/* TfWebcam positioned at the bottom-left and made smaller */}
-  <TfWebcam 
-    style={{ 
-      position: "absolute",
-      bottom: "20px", // Distance from the bottom
-      left: "20px",   // Distance from the left
-      width: "200px", // Smaller width
-      height: "150px", // Smaller height
-      borderRadius: "10px", // Rounded corners
-      border: "2px solid #00ff88", // Border for better visibility
-      boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)", // Subtle shadow
-      objectFit: "cover" // Ensure the webcam feed covers the area
-    }} 
-  />
-
-  {loading && (
     <div
+      ref={mountRef}
       style={{
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        color: "white",
-        fontSize: "24px",
-        fontWeight: "bold",
-        textAlign: "center",
-        backgroundColor: "rgba(0, 0, 0, 0.7)", // Semi-transparent background
-        padding: "20px 40px",
-        borderRadius: "10px",
-        boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)" // Subtle shadow for depth
+        width: "100vw",
+        height: "100vh",
+        position: "relative",
+        overflow: "hidden",
+        backgroundColor: "#1e1e1e", // Dark background for better contrast
       }}
     >
-      Loading... {Math.round(progress)}%
-      <div 
+      {/* TfWebcam positioned at the bottom-left and made smaller */}
+      <TfWebcam
+        onMovementUpdate={handleMovementUpdate}
         style={{
-          marginTop: "10px",
-          width: "200px",
-          height: "10px",
-          backgroundColor: "rgba(255, 255, 255, 0.2)",
-          borderRadius: "5px",
-          overflow: "hidden"
+          position: "absolute",
+          bottom: "20px", // Distance from the bottom
+          left: "20px", // Distance from the left
+          width: "200px", // Smaller width
+          height: "150px", // Smaller height
+          borderRadius: "10px", // Rounded corners
+          border: "2px solid #00ff88", // Border for better visibility
+          boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)", // Subtle shadow
+          objectFit: "cover", // Ensure the webcam feed covers the area
         }}
-      >
-        <div 
+      />
+
+      {loading && (
+        <div
           style={{
-            width: `${progress}%`,
-            height: "100%",
-            backgroundColor: "#00ff88", // Vibrant progress bar color
-            transition: "width 0.3s ease" // Smooth transition for progress
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            color: "white",
+            fontSize: "24px",
+            fontWeight: "bold",
+            textAlign: "center",
+            backgroundColor: "rgba(0, 0, 0, 0.7)", // Semi-transparent background
+            padding: "20px 40px",
+            borderRadius: "10px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)", // Subtle shadow for depth
           }}
-        />
-      </div>
+        >
+          Loading... {Math.round(progress)}%
+          <div
+            style={{
+              marginTop: "10px",
+              width: "200px",
+              height: "10px",
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+              borderRadius: "5px",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                width: `${progress}%`,
+                height: "100%",
+                backgroundColor: "#00ff88", // Vibrant progress bar color
+                transition: "width 0.3s ease", // Smooth transition for progress
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
-  )}
-</div>
   );
 };
 
