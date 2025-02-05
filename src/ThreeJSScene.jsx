@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min";
 import Stats from "three/examples/jsm/libs/stats.module";
+import TfWebcam from "./tfwebcam";
 
 // Centralized configuration object for easy adjustments
 const CONFIG = {
@@ -424,21 +425,71 @@ const ThreeJSScene = () => {
   }, []);
 
   return (
-    <div ref={mountRef} style={{ width: "100vw", height: "100vh" }}>
-      {loading && (
-        <div
+<div 
+  ref={mountRef} 
+  style={{ 
+    width: "100vw", 
+    height: "100vh", 
+    position: "relative", 
+    overflow: "hidden", 
+    backgroundColor: "#1e1e1e" // Dark background for better contrast
+  }}
+>
+  {/* TfWebcam positioned at the bottom-left and made smaller */}
+  <TfWebcam 
+    style={{ 
+      position: "absolute",
+      bottom: "20px", // Distance from the bottom
+      left: "20px",   // Distance from the left
+      width: "200px", // Smaller width
+      height: "150px", // Smaller height
+      borderRadius: "10px", // Rounded corners
+      border: "2px solid #00ff88", // Border for better visibility
+      boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)", // Subtle shadow
+      objectFit: "cover" // Ensure the webcam feed covers the area
+    }} 
+  />
+
+  {loading && (
+    <div
+      style={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        color: "white",
+        fontSize: "24px",
+        fontWeight: "bold",
+        textAlign: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.7)", // Semi-transparent background
+        padding: "20px 40px",
+        borderRadius: "10px",
+        boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)" // Subtle shadow for depth
+      }}
+    >
+      Loading... {Math.round(progress)}%
+      <div 
+        style={{
+          marginTop: "10px",
+          width: "200px",
+          height: "10px",
+          backgroundColor: "rgba(255, 255, 255, 0.2)",
+          borderRadius: "5px",
+          overflow: "hidden"
+        }}
+      >
+        <div 
           style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            color: "white",
+            width: `${progress}%`,
+            height: "100%",
+            backgroundColor: "#00ff88", // Vibrant progress bar color
+            transition: "width 0.3s ease" // Smooth transition for progress
           }}
-        >
-          Loading... {Math.round(progress)}%
-        </div>
-      )}
+        />
+      </div>
     </div>
+  )}
+</div>
   );
 };
 
